@@ -1,0 +1,61 @@
+
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2>Registro de usuarios</h2>
+
+<p>
+    Crea tu cuenta para acceder al sistema
+    del Festival de la Leyenda Vallenata 2027.
+</p>
+
+<form method="post">
+    {% csrf_token %}
+
+    {% for campo in formulario %}
+        <div style="margin-bottom: 18px;">
+
+            <label for="{{ campo.id_for_label }}">
+                <strong>{{ campo.label }}</strong>
+            </label>
+
+            <div style="margin-top: 6px;">
+                {{ campo }}
+            </div>
+
+            {% if campo.help_text %}
+                <small>{{ campo.help_text }}</small>
+            {% endif %}
+
+            {% for error in campo.errors %}
+                <p style="color: red;">{{ error }}</p>
+            {% endfor %}
+
+        </div>
+    {% endfor %}
+
+    {% if formulario.non_field_errors %}
+        <div style="color: red;">
+            {{ formulario.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <button type="submit" style="
+        background-color: #17365d;
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    ">
+        Crear cuenta
+    </button>
+</form>
+
+<p>
+    ¿Ya tienes una cuenta?
+    <a href="{% url 'login' %}">Inicia sesión aquí</a>.
+</p>
+
+{% endblock %}

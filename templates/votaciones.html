@@ -1,0 +1,64 @@
+
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2>Votaciones de {{ categoria.nombre }}</h2>
+
+<p>
+    Consulta las votaciones disponibles
+    para esta categoría del Festival Vallenato.
+</p>
+
+<hr>
+
+{% for votacion in votaciones %}
+
+    <div style="
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    ">
+
+        <h3>{{ votacion.titulo }}</h3>
+
+        <p>{{ votacion.descripcion }}</p>
+
+        <p>
+            <strong>Fecha de inicio:</strong>
+            {{ votacion.fecha_inicio|date:"d/m/Y H:i" }}
+        </p>
+
+        <p>
+            <strong>Fecha de finalización:</strong>
+            {{ votacion.fecha_fin|date:"d/m/Y H:i" }}
+        </p>
+
+        <p>
+            <strong>Estado:</strong>
+
+            {% if votacion.activa %}
+                Activa
+            {% else %}
+                Inactiva
+            {% endif %}
+        </p>
+
+        <a href="{% url 'detalle_votacion' votacion.id %}">
+            Ver participantes
+        </a>
+
+    </div>
+
+{% empty %}
+
+    <p>No hay votaciones registradas en esta categoría.</p>
+
+{% endfor %}
+
+<a href="{% url 'categorias' categoria.edicion.id %}">
+    Volver a categorías
+</a>
+
+{% endblock %}
