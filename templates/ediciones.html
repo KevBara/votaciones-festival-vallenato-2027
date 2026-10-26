@@ -1,0 +1,50 @@
+
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2>Ediciones del Festival Vallenato</h2>
+
+<p>
+    Consulta las diferentes ediciones del Festival
+    de la Leyenda Vallenata registradas en el sistema.
+</p>
+
+<hr>
+
+{% for edicion in ediciones %}
+
+    <div style="
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    ">
+
+        <h3>{{ edicion.nombre }} - {{ edicion.anio }}</h3>
+
+        <p>{{ edicion.descripcion }}</p>
+
+        <p>
+            <strong>Fecha de inicio:</strong>
+            {{ edicion.fecha_inicio|date:"d/m/Y" }}
+        </p>
+
+        <p>
+            <strong>Fecha de finalización:</strong>
+            {{ edicion.fecha_fin|date:"d/m/Y" }}
+        </p>
+
+        <a href="{% url 'categorias' edicion.id %}">
+            Ver categorías
+        </a>
+
+    </div>
+
+{% empty %}
+
+    <p>No hay ediciones disponibles actualmente.</p>
+
+{% endfor %}
+
+{% endblock %}

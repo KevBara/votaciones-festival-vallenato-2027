@@ -1,0 +1,57 @@
+
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2>{{ votacion.titulo }}</h2>
+
+<p>{{ votacion.descripcion }}</p>
+
+<p>
+    <strong>Categoría:</strong>
+    {{ votacion.categoria.nombre }}
+</p>
+
+<p>
+    <strong>Edición:</strong>
+    {{ votacion.categoria.edicion.anio }}
+</p>
+
+<hr>
+
+<h3>Participantes registrados</h3>
+
+{% for opcion in opciones %}
+
+    <div style="
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+    ">
+
+        <h3>{{ opcion.nombre }}</h3>
+
+        <p>{{ opcion.descripcion }}</p>
+
+    </div>
+
+{% empty %}
+
+    <p>
+        No hay participantes registrados
+        en esta votación.
+    </p>
+
+{% endfor %}
+
+<p style="color: #666;">
+    Las votaciones estarán disponibles
+    en una próxima fase del proyecto.
+</p>
+
+<a href="{% url 'votaciones' votacion.categoria.id %}">
+    Volver a votaciones
+</a>
+
+{% endblock %}

@@ -1,0 +1,47 @@
+
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2>Categorías del Festival {{ edicion.anio }}</h2>
+
+<p>
+    Explora las diferentes categorías de
+    {{ edicion.nombre }}.
+</p>
+
+<hr>
+
+{% for categoria in categorias %}
+
+    <div style="
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    ">
+
+        <h3>{{ categoria.nombre }}</h3>
+
+        <p>{{ categoria.descripcion }}</p>
+
+        <a href="{% url 'votaciones' categoria.id %}">
+            Ver votaciones
+        </a>
+
+    </div>
+
+{% empty %}
+
+    <p>
+        No hay categorías registradas
+        para esta edición del festival.
+    </p>
+
+{% endfor %}
+
+<a href="{% url 'ediciones' %}">
+    Volver a ediciones
+</a>
+
+{% endblock %}

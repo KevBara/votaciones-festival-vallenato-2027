@@ -1,0 +1,77 @@
+
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2>Iniciar sesión</h2>
+
+<p>
+    Ingresa con tu cuenta para acceder al
+    Festival de la Leyenda Vallenata 2027.
+</p>
+
+<form method="post">
+    {% csrf_token %}
+
+    {% if form.errors %}
+        <p style="color: red;">
+            Usuario o contraseña incorrectos.
+            Inténtalo nuevamente.
+        </p>
+    {% endif %}
+
+    <div style="margin-bottom: 20px;">
+        <label for="id_username">
+            <strong>Nombre de usuario</strong>
+        </label>
+        <br>
+        <input
+            type="text"
+            name="username"
+            id="id_username"
+            required
+            autocomplete="username"
+        >
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <label for="id_password">
+            <strong>Contraseña</strong>
+        </label>
+        <br>
+        <input
+            type="password"
+            name="password"
+            id="id_password"
+            required
+            autocomplete="current-password"
+        >
+    </div>
+
+    <input
+        type="hidden"
+        name="next"
+        value="{{ next }}"
+    >
+
+    <button type="submit" style="
+        background-color: #17365d;
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    ">
+        Iniciar sesión
+    </button>
+
+</form>
+
+<p>
+    ¿No tienes cuenta?
+    <a href="{% url 'registro' %}">
+        Regístrate aquí
+    </a>
+</p>
+
+{% endblock %}

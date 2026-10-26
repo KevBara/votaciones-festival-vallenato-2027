@@ -1,0 +1,54 @@
+
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2>Bienvenido al Festival de la Leyenda Vallenata</h2>
+
+<p>
+    Consulta las diferentes ediciones del festival,
+    conoce sus categorías, votaciones y participantes.
+</p>
+
+{% if user.is_authenticated %}
+    <p>
+        Bienvenido, <strong>{{ user.username }}</strong>.
+        Ya puedes explorar el festival.
+    </p>
+{% else %}
+    <p>
+        ¿Todavía no tienes una cuenta?
+        <a href="{% url 'registro' %}">Regístrate aquí</a>.
+    </p>
+{% endif %}
+
+<hr>
+
+<h3>Ediciones disponibles</h3>
+
+{% for edicion in ediciones %}
+
+    <div style="
+        border: 1px solid #ddd;
+        padding: 20px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    ">
+
+        <h3>{{ edicion.nombre }} - {{ edicion.anio }}</h3>
+
+        <p>{{ edicion.descripcion }}</p>
+
+        <a href="{% url 'categorias' edicion.id %}">
+            Ver categorías
+        </a>
+
+    </div>
+
+{% empty %}
+
+    <p>No hay ediciones registradas actualmente.</p>
+
+{% endfor %}
+
+{% endblock %}
