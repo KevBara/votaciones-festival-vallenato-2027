@@ -3,75 +3,38 @@
 
 {% block contenido %}
 
-<h2>Iniciar sesión</h2>
-
-<p>
-    Ingresa con tu cuenta para acceder al
-    Festival de la Leyenda Vallenata 2027.
-</p>
-
-<form method="post">
-    {% csrf_token %}
-
-    {% if form.errors %}
-        <p style="color: red;">
-            Usuario o contraseña incorrectos.
-            Inténtalo nuevamente.
-        </p>
-    {% endif %}
-
-    <div style="margin-bottom: 20px;">
-        <label for="id_username">
-            <strong>Nombre de usuario</strong>
-        </label>
-        <br>
-        <input
-            type="text"
-            name="username"
-            id="id_username"
-            required
-            autocomplete="username"
-        >
+<section class="auth-layout auth-layout-login">
+    <div class="auth-art">
+        <p class="eyebrow">Bienvenido de vuelta</p>
+        <h1>La música nos reúne.</h1>
+        <p>Ingresa para continuar tu recorrido y apoyar a tus favoritos.</p>
     </div>
+    <div class="auth-card">
+        <p class="eyebrow">Festival de la Leyenda Vallenata</p>
+        <h2>Iniciar sesión</h2>
+        <p class="auth-lead">Accede con tu nombre de usuario y contraseña.</p>
 
-    <div style="margin-bottom: 20px;">
-        <label for="id_password">
-            <strong>Contraseña</strong>
-        </label>
-        <br>
-        <input
-            type="password"
-            name="password"
-            id="id_password"
-            required
-            autocomplete="current-password"
-        >
+        <form method="post" class="stacked-form">
+            {% csrf_token %}
+            {% if form.errors %}
+                <div class="form-errors" role="alert">
+                    El usuario o la contraseña no son correctos. Verifica tus datos e inténtalo de nuevo.
+                </div>
+            {% endif %}
+            <div class="form-field">
+                <label for="id_username">Nombre de usuario</label>
+                <input class="form-control" type="text" name="username" id="id_username" required autocomplete="username" autofocus>
+            </div>
+            <div class="form-field">
+                <label for="id_password">Contraseña</label>
+                <input class="form-control" type="password" name="password" id="id_password" required autocomplete="current-password">
+            </div>
+            <input type="hidden" name="next" value="{{ next }}">
+            <button type="submit" class="button button-gold button-full">Entrar a mi cuenta <span aria-hidden="true">→</span></button>
+        </form>
+
+        <p class="auth-switch">¿Aún no tienes cuenta? <a href="{% url 'registro' %}">Regístrate</a></p>
     </div>
-
-    <input
-        type="hidden"
-        name="next"
-        value="{{ next }}"
-    >
-
-    <button type="submit" style="
-        background-color: #17365d;
-        color: white;
-        padding: 12px 24px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-    ">
-        Iniciar sesión
-    </button>
-
-</form>
-
-<p>
-    ¿No tienes cuenta?
-    <a href="{% url 'registro' %}">
-        Regístrate aquí
-    </a>
-</p>
+</section>
 
 {% endblock %}

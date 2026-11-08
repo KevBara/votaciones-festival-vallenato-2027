@@ -1,64 +1,116 @@
-# votaciones-festival-vallenato-2027
-Sistema web de votaciones para el Festival de la Leyenda Vallenata 2027. Desarrollado con Python, Django y MySQL para la administración de ediciones, categorías y opciones de votación.
+# Sistema de votaciones — Festival de la Leyenda Vallenata 2027
 
-# Sistema Web de Votaciones - Festival de la Leyenda Vallenata 2027
+Aplicación web construida con Django y MySQL para administrar ediciones,
+categorías, votaciones y opciones participantes.
 
-Este repositorio contiene el código fuente correspondiente a la **Entrega 2** del sistema de votaciones web para el Festival de la Leyenda Vallenata 2027. Desarrollado bajo la arquitectura Django MVT (Model-View-Template) y base de datos relacional MySQL.
+## Requisitos
 
-**Requisitos Previos**
 - Python 3.9 o superior.
-- MySQL Community Server (v8.0+) y MySQL Workbench.
-- Git.
+- MySQL Community Server 8.0 o superior, iniciado y accesible desde el equipo.
+- MySQL Workbench (para ejecutar el script de datos de prueba).
 
-**1. Clonar el repositorio y preparar el entorno**
-Clona el proyecto en tu máquina local y accede a la carpeta raíz:
-```bash
-git clone <AQUI_PEGAS_LA_URL_DE_TU_REPOSITORIO>
-cd <AQUI_PONES_EL_NOMBRE_DE_LA_CARPETA>
-Crea y activa un entorno virtual para aislar las dependencias:
+## Instalación en Windows
 
-Windows:
+Abre PowerShell en la carpeta del proyecto y crea/activa un entorno virtual:
 
-Bash
+```powershell
 python -m venv venv
-venv\Scripts\activate
-Mac/Linux:
-
-Bash
-python3 -m venv venv
-source venv/bin/activate
-Instala las librerías necesarias ejecutando:
-
-Bash
+.\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-2. Configuración de la Base de Datos (MySQL)
-Abre MySQL Workbench, inicia sesión con tu usuario root y ejecuta la siguiente instrucción SQL para crear la base de datos del proyecto:
+```
 
-SQL
-CREATE DATABASE festival_vallenato;
-3. Variables de Entorno (.env)
-Para proteger las credenciales locales, este proyecto utiliza variables de entorno. Crea un archivo llamado estrictamente .env en la raíz del proyecto (al mismo nivel que manage.py) y agrega el siguiente contenido, reemplazando la contraseña por la de tu instalación local de MySQL:
+Si PowerShell no permite activar el entorno, puedes ejecutar los comandos de
+Django con `.\venv\Scripts\python.exe` sin activarlo.
 
-Fragmento de código
-DB_NAME=festival_vallenato
-DB_USER=root
-DB_PASSWORD=tu_contraseña_real_aqui
-(Nota: El archivo .env está excluido del repositorio por seguridad en el .gitignore).
+## Configurar MySQL
 
-4. Migraciones y Ejecución
-Conecta la estructura de Django a tu base de datos local y levanta el servidor de desarrollo:
+1. Inicia el servicio de MySQL Server.
+2. En MySQL Workbench, conéctate al servidor local y crea el esquema:
 
-Bash
-python manage.py migrate
-python manage.py runserver
-Abre tu navegador web e ingresa a http://127.0.0.1:8000/ para visualizar la aplicación en funcionamiento.
+   ```sql
+   CREATE DATABASE IF NOT EXISTS festival_vallenato
+       CHARACTER SET utf8mb4
+       COLLATE utf8mb4_unicode_ci;
+   ```
 
-Equipo de Desarrollo
+3. En la raíz del proyecto, crea un archivo `.env` junto a `manage.py` con las
+   credenciales del servidor local. Ajusta el usuario y la contraseña a los
+   que configuraste en MySQL:
 
-Integrante 1: Arquitectura, Infraestructura y Repositorio.
+   ```dotenv
+   DB_NAME=festival_vallenato
+   DB_USER=root
+   DB_PASSWORD=tu_contraseña_local
+   DJANGO_DEBUG=True
+   DJANGO_SECRET_KEY=clave-local-solo-para-desarrollo
+   DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+   DJANGO_CSRF_TRUSTED_ORIGINS=
+   ```
 
-Integrante 2: Modelado de Datos y Backend.
+   `.env` no se debe compartir ni subir al repositorio. Estos valores son
+   únicamente para desarrollo local; para producción configura una clave
+   secreta nueva, `DJANGO_DEBUG=False` y los dominios/orígenes reales.
 
-Integrante 3: Autenticación y Vistas (Frontend).
+## Crear las tablas y cargar los datos de prueba
 
-Integrante 4: QA, Administración (Django Admin) y Documentación.
+El orden es importante: **Django debe crear primero las tablas; después se
+ejecuta el SQL de datos de prueba**. El script inserta datos, pero no sustituye
+las migraciones.
+
+1. Desde PowerShell, en la raíz del proyecto, aplica las migraciones:
+
+   ```powershell
+   .\venv\Scripts\python.exe manage.py migrate
+   ```
+
+   Esto crea las tablas de Django, incluidas las de votaciones, usuarios y
+   sesiones. Si falla con un error de conexión, verifica que MySQL esté
+   iniciado y que `DB_NAME`, `DB_USER` y `DB_PASSWORD` en `.env` sean correctos.
+
+2. En MySQL Workbench, abre el archivo
+   [`votaciones/datos_prueba.sql`](votaciones/datos_prueba.sql) y ejecútalo
+   completo contra el servidor local. El script selecciona el esquema
+   `festival_vallenato` y carga una edición 2027 con categorías, votaciones
+   abiertas y opciones de demostración. Es idempotente para esos datos y no
+   crea usuarios ni contraseñas.
+
+3. (Opcional) Comprueba en Workbench el resultado de la consulta `SELECT` que
+   está al final del script.
+
+**No ejecutes este SQL en producción.** Las opciones de ejemplo no incluyen
+imágenes; la aplicación mostrará un placeholder. Para probar imágenes, edita
+una opción en el admin de Django y configura su URL de imagen.
+
+## Iniciar y probar la aplicación
+
+Inicia el servidor desde PowerShell:
+
+```powershell
+.\venv\Scripts\python.exe manage.py runserver
+```
+
+Abre <http://127.0.0.1:8000/>. Crea una cuenta desde la aplicación e inicia
+sesión; el script SQL no genera usuarios. Luego:
+
+1. En Inicio, abre **Ediciones disponibles** y selecciona la edición 2027.
+2. Entra a una categoría, abre su votación, elige una opción y confirma el voto.
+3. Vuelve al detalle de esa votación para comprobar que se muestra tu elección
+   y que no puedes votar una segunda vez.
+4. Registra otro usuario para comprobar que puede votar de forma independiente.
+5. Para probar una votación cerrada, cambia su estado o sus fechas desde el
+   admin de Django.
+
+Para acceder al admin, crea una cuenta de administración desde otra consola:
+
+```powershell
+.\venv\Scripts\python.exe manage.py createsuperuser
+```
+
+Para ejecutar las pruebas automatizadas:
+
+```powershell
+.\venv\Scripts\python.exe manage.py test votaciones
+```
+
+La restricción única de la base de datos y el bloqueo de la votación protegen
+contra votos duplicados, incluidas solicitudes simultáneas.

@@ -28,13 +28,6 @@ urlpatterns = [
         name="logout"
     ),
 
-    # Ediciones del festival
-    path(
-        "ediciones/",
-        views.listar_ediciones,
-        name="ediciones"
-    ),
-
     # Categorías de una edición
     path(
         "ediciones/<int:edicion_id>/categorias/",
@@ -54,5 +47,10 @@ urlpatterns = [
         "votaciones/<int:votacion_id>/",
         views.detalle_votacion,
         name="detalle_votacion"
+    ),
+    path(
+        "votaciones/<int:votacion_id>/votar/",
+        views.registrar_voto,
+        name="registrar_voto"
     ),
 ]

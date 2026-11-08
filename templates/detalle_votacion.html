@@ -1,57 +1,134 @@
 
 {% extends "base.html" %}
 
+{% block titulo %}{{ votacion.titulo }} | Festival Vallenato 2027{% endblock %}
+
 {% block contenido %}
 
-<h2>{{ votacion.titulo }}</h2>
+<div class="page-heading">
+    <p class="eyebrow">{{ votacion.categoria.edicion.nombre }} {{ votacion.categoria.edicion.anio }}</p>
+    <h2>{{ votacion.titulo }}</h2>
+    {% if votacion.descripcion %}
+        <p>{{ votacion.descripcion }}</p>
+    {% endif %}
+</div>
 
-<p>{{ votacion.descripcion }}</p>
+{% if confirmado %}
+    <section class="confirmation-panel" aria-live="polite">
+        <span class="confirmation-icon" aria-hidden="true">✓</span>
+        <div>
+            <p class="eyebrow">Voto registrado</p>
+            {% if siguiente_votacion %}
+                <h2>¡Gracias por participar!</h2>
+            {% else %}
+                <h2>¡Completaste todas las votaciones!</h2>
+            {% endif %}
+            {% if siguiente_votacion %}
+                <p>Tu próxima categoría es <strong>{{ siguiente_votacion.categoria.nombre }}</strong>.</p>
+            {% else %}
+                <p>Tu participación en esta edición ha terminado. Gracias por celebrar el talento vallenato.</p>
+            {% endif %}
+        </div>
+        {% if siguiente_votacion %}
+            <a class="button button-gold" href="{% url 'detalle_votacion' siguiente_votacion.id %}">
+                Continuar a {{ siguiente_votacion.categoria.nombre }} <span aria-hidden="true">→</span>
+            </a>
+        {% else %}
+            <a class="button button-gold" href="{% url 'categorias' votacion.categoria.edicion.id %}">
+                Volver a categorías <span aria-hidden="true">→</span>
+            </a>
+        {% endif %}
+    </section>
+{% endif %}
 
-<p>
-    <strong>Categoría:</strong>
-    {{ votacion.categoria.nombre }}
-</p>
+<div class="vote-meta">
+    <span><strong>Categoría:</strong> {{ votacion.categoria.nombre }}</span>
+    <span><strong>Abre:</strong> {{ votacion.fecha_inicio|date:"d/m/Y H:i" }}</span>
+    <span><strong>Cierra:</strong> {{ votacion.fecha_fin|date:"d/m/Y H:i" }}</span>
+</div>
 
-<p>
-    <strong>Edición:</strong>
-    {{ votacion.categoria.edicion.anio }}
-</p>
-
-<hr>
-
-<h3>Participantes registrados</h3>
-
-{% for opcion in opciones %}
-
-    <div style="
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 15px;
-    ">
-
-        <h3>{{ opcion.nombre }}</h3>
-
-        <p>{{ opcion.descripcion }}</p>
-
+{% if ya_voto %}
+    <section class="notice notice-success" aria-live="polite">
+        <strong>Tu voto:</strong> {{ mi_voto.opcion.nombre }}. Tu elección quedó guardada y no es posible cambiarla.
+    </section>
+    <article class="selected-option-card">
+        {% if mi_voto.opcion.imagen_url %}
+            <img class="participant-image" src="{{ mi_voto.opcion.imagen_url }}" alt="Imagen de {{ mi_voto.opcion.nombre }}" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+        {% else %}
+            <span class="participant-placeholder" aria-hidden="true"><span>♪</span></span>
+        {% endif %}
+        <div>
+            <p class="eyebrow">Tu elección</p>
+            <h3>{{ mi_voto.opcion.nombre }}</h3>
+            {% if mi_voto.opcion.descripcion %}<p>{{ mi_voto.opcion.descripcion }}</p>{% endif %}
+        </div>
+        <span class="selected-check" aria-label="Opción seleccionada">✓</span>
+    </article>
+{% elif not disponible %}
+    <section class="notice" role="status">
+        Esta votación no está habilitada en este momento.
+    </section>
+{% elif not opciones %}
+    <section class="notice" role="status">
+        Aún no hay opciones disponibles para esta votación.
+    </section>
+{% elif user.is_authenticated %}
+    <form method="post" action="{% url 'registrar_voto' votacion.id %}" class="vote-form">
+        {% csrf_token %}
+        <fieldset>
+            <legend>Elige una opción</legend>
+            {{ formulario.opcion.errors }}
+            <div class="option-list">
+                {% for opcion in opciones %}
+                    <label class="option-card" for="id_opcion_{{ forloop.counter }}">
+                        <input
+                            type="radio"
+                            name="opcion"
+                            value="{{ opcion.id }}"
+                            id="id_opcion_{{ forloop.counter }}"
+                            required
+                        >
+                        {% if opcion.imagen_url %}
+                            <img class="participant-image" src="{{ opcion.imagen_url }}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+                        {% else %}
+                            <span class="participant-placeholder" aria-hidden="true"><span>♪</span></span>
+                        {% endif %}
+                        <span class="option-copy">
+                            <strong>{{ opcion.nombre }}</strong>
+                            {% if opcion.descripcion %}<span>{{ opcion.descripcion }}</span>{% endif %}
+                        </span>
+                    </label>
+                {% endfor %}
+            </div>
+        </fieldset>
+        <p class="form-hint">Tu selección es definitiva y solo puedes votar una vez.</p>
+        <button type="submit" class="button button-gold">Confirmar mi voto <span aria-hidden="true">→</span></button>
+    </form>
+{% else %}
+    <section class="notice" role="status">
+        Para votar debes iniciar sesión.
+        <a href="{% url 'login' %}?next={{ request.path|urlencode }}">Inicia sesión</a>
+        o <a href="{% url 'registro' %}">crea una cuenta</a>.
+    </section>
+    <div class="option-list option-list-preview">
+        {% for opcion in opciones %}
+            <article class="option-card option-preview">
+                {% if opcion.imagen_url %}
+                    <img class="participant-image" src="{{ opcion.imagen_url }}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+                {% else %}
+                    <span class="participant-placeholder" aria-hidden="true"><span>♪</span></span>
+                {% endif %}
+                <span class="option-copy">
+                    <strong>{{ opcion.nombre }}</strong>
+                    {% if opcion.descripcion %}<span>{{ opcion.descripcion }}</span>{% endif %}
+                </span>
+            </article>
+        {% endfor %}
     </div>
+{% endif %}
 
-{% empty %}
-
-    <p>
-        No hay participantes registrados
-        en esta votación.
-    </p>
-
-{% endfor %}
-
-<p style="color: #666;">
-    Las votaciones estarán disponibles
-    en una próxima fase del proyecto.
-</p>
-
-<a href="{% url 'votaciones' votacion.categoria.id %}">
-    Volver a votaciones
-</a>
+<div class="page-actions">
+    <a class="back-link" href="{% url 'votaciones' votacion.categoria.id %}">Volver a votaciones</a>
+</div>
 
 {% endblock %}

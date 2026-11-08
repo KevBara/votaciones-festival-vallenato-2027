@@ -3,59 +3,39 @@
 
 {% block contenido %}
 
-<h2>Registro de usuarios</h2>
+<section class="auth-layout">
+    <div class="auth-art">
+        <p class="eyebrow">La tradición sigue viva</p>
+        <h1>Tu voz también hace parte del festival.</h1>
+        <p>Crea tu cuenta y acompaña a los artistas que mantienen viva la música vallenata.</p>
+    </div>
+    <div class="auth-card">
+        <p class="eyebrow">Únete a la celebración</p>
+        <h2>Crear cuenta</h2>
+        <p class="auth-lead">Completa tus datos para participar en las votaciones.</p>
 
-<p>
-    Crea tu cuenta para acceder al sistema
-    del Festival de la Leyenda Vallenata 2027.
-</p>
-
-<form method="post">
-    {% csrf_token %}
-
-    {% for campo in formulario %}
-        <div style="margin-bottom: 18px;">
-
-            <label for="{{ campo.id_for_label }}">
-                <strong>{{ campo.label }}</strong>
-            </label>
-
-            <div style="margin-top: 6px;">
-                {{ campo }}
-            </div>
-
-            {% if campo.help_text %}
-                <small>{{ campo.help_text }}</small>
+        <form method="post" class="stacked-form">
+            {% csrf_token %}
+            {% if formulario.non_field_errors %}
+                <div class="form-errors" role="alert">{{ formulario.non_field_errors }}</div>
             {% endif %}
-
-            {% for error in campo.errors %}
-                <p style="color: red;">{{ error }}</p>
+            {% for campo in formulario %}
+                <div class="form-field">
+                    <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                    {{ campo }}
+                    {% if campo.help_text %}
+                        <small class="form-help">{{ campo.help_text }}</small>
+                    {% endif %}
+                    {% for error in campo.errors %}
+                        <small class="field-error" role="alert">{{ error }}</small>
+                    {% endfor %}
+                </div>
             {% endfor %}
+            <button type="submit" class="button button-gold button-full">Crear mi cuenta <span aria-hidden="true">→</span></button>
+        </form>
 
-        </div>
-    {% endfor %}
-
-    {% if formulario.non_field_errors %}
-        <div style="color: red;">
-            {{ formulario.non_field_errors }}
-        </div>
-    {% endif %}
-
-    <button type="submit" style="
-        background-color: #17365d;
-        color: white;
-        padding: 12px 24px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-    ">
-        Crear cuenta
-    </button>
-</form>
-
-<p>
-    ¿Ya tienes una cuenta?
-    <a href="{% url 'login' %}">Inicia sesión aquí</a>.
-</p>
+        <p class="auth-switch">¿Ya tienes una cuenta? <a href="{% url 'login' %}">Inicia sesión</a></p>
+    </div>
+</section>
 
 {% endblock %}

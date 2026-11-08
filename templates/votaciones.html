@@ -3,62 +3,35 @@
 
 {% block contenido %}
 
-<h2>Votaciones de {{ categoria.nombre }}</h2>
+<section class="page-intro">
+    <p class="eyebrow">{{ categoria.edicion.nombre }} · {{ categoria.edicion.anio }}</p>
+    <h1>{{ categoria.nombre }}</h1>
+    <p>Elige una votación para conocer a sus participantes y registrar tu voto.</p>
+</section>
 
-<p>
-    Consulta las votaciones disponibles
-    para esta categoría del Festival Vallenato.
-</p>
+<div class="edition-grid">
+    {% for votacion in votaciones %}
+        <article class="edition-card vote-card">
+            <span class="card-kicker">Votación oficial</span>
+            <h2>{{ votacion.titulo }}</h2>
+            <p>{{ votacion.descripcion|default:"Apoya a tu favorito en esta categoría." }}</p>
+            <div class="card-meta">
+                <span>Desde {{ votacion.fecha_inicio|date:"d/m/Y H:i" }}</span>
+                <span>Hasta {{ votacion.fecha_fin|date:"d/m/Y H:i" }}</span>
+            </div>
+            <span class="status-badge {% if votacion.activa %}status-available{% else %}status-unavailable{% endif %}">
+                <i class="status-dot {% if votacion.activa %}available{% else %}unavailable{% endif %}" aria-hidden="true"></i>
+                {% if votacion.activa %}Votación habilitada{% else %}Votación cerrada{% endif %}
+            </span>
+            <a class="button button-dark" href="{% url 'detalle_votacion' votacion.id %}">Ver participantes <span aria-hidden="true">→</span></a>
+        </article>
+    {% empty %}
+        <p class="empty-state">No hay votaciones registradas en esta categoría.</p>
+    {% endfor %}
+</div>
 
-<hr>
-
-{% for votacion in votaciones %}
-
-    <div style="
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 20px;
-    ">
-
-        <h3>{{ votacion.titulo }}</h3>
-
-        <p>{{ votacion.descripcion }}</p>
-
-        <p>
-            <strong>Fecha de inicio:</strong>
-            {{ votacion.fecha_inicio|date:"d/m/Y H:i" }}
-        </p>
-
-        <p>
-            <strong>Fecha de finalización:</strong>
-            {{ votacion.fecha_fin|date:"d/m/Y H:i" }}
-        </p>
-
-        <p>
-            <strong>Estado:</strong>
-
-            {% if votacion.activa %}
-                Activa
-            {% else %}
-                Inactiva
-            {% endif %}
-        </p>
-
-        <a href="{% url 'detalle_votacion' votacion.id %}">
-            Ver participantes
-        </a>
-
-    </div>
-
-{% empty %}
-
-    <p>No hay votaciones registradas en esta categoría.</p>
-
-{% endfor %}
-
-<a href="{% url 'categorias' categoria.edicion.id %}">
-    Volver a categorías
-</a>
+<div class="page-actions">
+    <a class="back-link" href="{% url 'categorias' categoria.edicion.id %}">Volver a categorías</a>
+</div>
 
 {% endblock %}

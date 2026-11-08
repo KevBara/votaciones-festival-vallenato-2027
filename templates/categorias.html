@@ -3,45 +3,60 @@
 
 {% block contenido %}
 
-<h2>Categorías del Festival {{ edicion.anio }}</h2>
+<section class="page-intro">
+    <p class="eyebrow">{{ edicion.nombre }} · {{ edicion.anio }}</p>
+    <h1>Tu recorrido de votación</h1>
+    <p>Avanza categoría por categoría. Tu progreso queda guardado automáticamente.</p>
+    {% if user.is_authenticated %}
+        <div class="status-legend" aria-label="Estados de votación">
+            <span><i class="status-dot complete"></i> Votaste</span>
+            <span><i class="status-dot pending"></i> Pendiente</span>
+            <span><i class="status-dot unavailable"></i> No disponible</span>
+        </div>
+    {% endif %}
+</section>
 
-<p>
-    Explora las diferentes categorías de
-    {{ edicion.nombre }}.
-</p>
+<div class="category-list">
+    {% for categoria in categorias %}
+        <article class="category-card">
+            <div class="category-visual" aria-hidden="true">
+                <span class="category-art category-art-{{ categoria.nombre|slugify }}">
+                    <span class="category-art-symbol"></span>
+                </span>
+                <span class="category-index">{{ forloop.counter|stringformat:"02d" }}</span>
+            </div>
+            <div class="category-copy">
+                <p class="card-kicker">Categoría {{ forloop.counter }}</p>
+                <h2>{{ categoria.nombre }}</h2>
+                {% if categoria.descripcion %}<p>{{ categoria.descripcion }}</p>{% endif %}
+                {% if user.is_authenticated and categoria.cantidad_votaciones_total %}
+                    <p class="progress-label">
+                        {{ categoria.cantidad_votos_usuario }} de {{ categoria.cantidad_votaciones_total }} votaciones completadas
+                    </p>
+                {% endif %}
+            </div>
+            <div class="category-action">
+                <span class="status-badge status-{{ categoria.clase_estado }}">
+                    <i class="status-dot {{ categoria.clase_estado }}" aria-hidden="true"></i>
+                    {{ categoria.estado_votacion }}
+                </span>
+                {% if categoria.habilitada and categoria.cantidad_votaciones %}
+                    <a class="button button-dark" href="{% url 'votaciones' categoria.id %}">
+                        {% if categoria.clase_estado == "complete" %}Ver categoría{% else %}Continuar{% endif %}
+                        <span aria-hidden="true">→</span>
+                    </a>
+                {% else %}
+                    <span class="button button-disabled" aria-disabled="true">No disponible</span>
+                {% endif %}
+            </div>
+        </article>
+    {% empty %}
+        <p class="empty-state">Aún no hay categorías registradas para esta edición.</p>
+    {% endfor %}
+</div>
 
-<hr>
-
-{% for categoria in categorias %}
-
-    <div style="
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 20px;
-    ">
-
-        <h3>{{ categoria.nombre }}</h3>
-
-        <p>{{ categoria.descripcion }}</p>
-
-        <a href="{% url 'votaciones' categoria.id %}">
-            Ver votaciones
-        </a>
-
-    </div>
-
-{% empty %}
-
-    <p>
-        No hay categorías registradas
-        para esta edición del festival.
-    </p>
-
-{% endfor %}
-
-<a href="{% url 'ediciones' %}">
-    Volver a ediciones
-</a>
+<div class="page-actions">
+    <a class="back-link" href="{% url 'inicio' %}">Volver al inicio</a>
+</div>
 
 {% endblock %}
