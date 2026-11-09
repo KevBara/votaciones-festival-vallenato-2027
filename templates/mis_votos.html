@@ -1,0 +1,40 @@
+
+{% extends "base.html" %}
+
+{% block contenido %}
+<section class="page-intro">
+    <h1>Mi historial de votaciones</h1>
+    <p>Consulta las votaciones en las que has participado.</p>
+</section>
+
+<section class="content-section">
+    {% for voto in votos %}
+        <article class="history-item">
+            <h2>{{ voto.votacion.titulo }}</h2>
+
+            <p>
+                <strong>Edición:</strong>
+                {{ voto.votacion.categoria.edicion.anio }}
+            </p>
+
+            <p>
+                <strong>Categoría:</strong>
+                {{ voto.votacion.categoria.nombre }}
+            </p>
+
+            <p>
+                <strong>Participante elegido:</strong>
+                {{ voto.opcion.nombre }}
+            </p>
+
+            <p>
+                <strong>Fecha de participación:</strong>
+                {{ voto.creado_en|date:"d/m/Y H:i" }}
+            </p>
+        </article>
+        <hr>
+    {% empty %}
+        <p>Aún no has participado en ninguna votación.</p>
+    {% endfor %}
+</section>
+{% endblock %}

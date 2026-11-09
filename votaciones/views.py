@@ -1,7 +1,7 @@
 
 from django.db.models import Count, Q
 from django.db import IntegrityError, transaction
-from django.http import HttpResponseNotAllowed
+from django.http import HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -256,3 +256,73 @@ def registrar_voto(request, votacion_id):
         kwargs={"votacion_id": votacion_id}
     )
     return redirect(f"{detalle_url}?confirmado=1")
+
+# PERSONA 3 - API DE CATEGORIAS
+
+def api_categorias(request):
+    if request.method != "GET":
+        return HttpResponseNotAllowed(["GET"])
+
+    categorias = Categoria.objects.select_related(
+        "edicion"
+    ).prefetch_related(
+        "votaciones__opciones"
+    ).order_by("edicion__anio", "id")
+
+    resultado = []
+
+    for categoria in categorias:
+        lista_votaciones = []
+
+        for votacion in categoria.votaciones.all():
+            lista_opciones = []
+
+            for opcion in votacion.opciones.all():
+                lista_opciones.append({
+                    "id": opcion.id,
+                    "nombre": opcion.nombre,
+                    "descripcion": opcion.descripcion,
+                    "imagen_url": opcion.imagen_url
+                })
+
+            lista_votaciones.append({
+                "id": votacion.id,
+                "titulo": votacion.titulo,
+                "activa": votacion.esta_habilitada(),
+                "opciones": lista_opciones
+            })
+
+        resultado.append({
+            "id": categoria.id,
+            "nombre": categoria.nombre,
+            "descripcion": categoria.descripcion,
+            "habilitada": categoria.habilitada,
+            "edicion": {
+                "id": categoria.edicion.id,
+                "nombre": categoria.edicion.nombre,
+                "anio": categoria.edicion.anio
+            },
+            "votaciones": lista_votaciones
+        })
+
+    return JsonResponse(
+        {"categorias": resultado},
+        json_dumps_params={"ensure_ascii": False}
+    )
+
+
+
+# PERSONA 3 - HISTORIAL DE PARTICIPACION
+
+@login_required
+def mis_votos(request):
+    votos = Voto.objects.filter(
+        usuario=request.user
+    ).select_related(
+        "votacion__categoria__edicion",
+        "opcion"
+    ).order_by("-creado_en")
+
+    return render(request, "mis_votos.html", {
+        "votos": votos
+    })

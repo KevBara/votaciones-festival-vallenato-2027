@@ -401,3 +401,107 @@ class VotoConcurrenteTests(TransactionTestCase):
             ).count(),
             1
         )
+
+
+# PRUEBAS PERSONA 3: API E HISTORIAL
+
+class Persona3Tests(TestCase):
+
+    def setUp(self):
+        self.usuario = User.objects.create_user(
+            username="usuario_prueba_p3",
+            password="ClaveSegura2027!"
+        )
+
+        self.otro_usuario = User.objects.create_user(
+            username="otro_usuario_p3",
+            password="ClaveSegura2027!"
+        )
+
+        self.edicion = Edicion.objects.create(
+            nombre="Festival Vallenato",
+            anio=2027,
+            fecha_inicio=date(2027, 4, 1),
+            fecha_fin=date(2027, 4, 30)
+        )
+
+        self.categoria = Categoria.objects.create(
+            edicion=self.edicion,
+            nombre="Acordeoneros"
+        )
+
+        ahora = timezone.now()
+
+        self.votacion = Votacion.objects.create(
+            categoria=self.categoria,
+            titulo="Mejor acordeonero 2027",
+            fecha_inicio=ahora - timedelta(days=1),
+            fecha_fin=ahora + timedelta(days=1),
+            activa=True
+        )
+
+        self.opcion = Opcion.objects.create(
+            votacion=self.votacion,
+            nombre="Acordeonero B"
+        )
+
+    def test_api_devuelve_json(self):
+        respuesta = self.client.get("/api/categorias/")
+
+        self.assertEqual(respuesta.status_code, 200)
+
+        self.assertEqual(
+            respuesta["Content-Type"],
+            "application/json"
+        )
+
+        datos = respuesta.json()
+
+        self.assertEqual(
+            datos["categorias"][0]["nombre"],
+            "Acordeoneros"
+        )
+
+        self.assertEqual(
+            datos["categorias"][0]["votaciones"][0]
+            ["opciones"][0]["nombre"],
+            "Acordeonero B"
+        )
+
+    def test_historial_exige_inicio_sesion(self):
+        respuesta = self.client.get("/mis-votos/")
+
+        self.assertEqual(respuesta.status_code, 302)
+        self.assertIn("/login/", respuesta.url)
+
+    def test_historial_muestra_voto_propio(self):
+        Voto.objects.create(
+            usuario=self.usuario,
+            votacion=self.votacion,
+            opcion=self.opcion
+        )
+
+        self.client.force_login(self.usuario)
+
+        respuesta = self.client.get("/mis-votos/")
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(respuesta, "Acordeonero B")
+
+    def test_historial_no_muestra_voto_ajeno(self):
+        Voto.objects.create(
+            usuario=self.otro_usuario,
+            votacion=self.votacion,
+            opcion=self.opcion
+        )
+
+        self.client.force_login(self.usuario)
+
+        respuesta = self.client.get("/mis-votos/")
+
+        self.assertEqual(respuesta.status_code, 200)
+
+        self.assertNotContains(
+            respuesta,
+            "Acordeonero B"
+        )
