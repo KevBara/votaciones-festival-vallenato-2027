@@ -53,4 +53,19 @@ urlpatterns = [
         views.registrar_voto,
         name="registrar_voto"
     ),
+
+    # Persona 3 - API de categorias
+    path(
+        "api/categorias/",
+        views.api_categorias,
+        name="api_categorias"
+    ),
+
+    # Persona 3 - Historial de participacion
+    path(
+        "mis-votos/",
+        views.mis_votos,
+        name="mis_votos"
+    ),
+
 ]
